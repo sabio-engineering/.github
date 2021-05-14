@@ -3,8 +3,7 @@
     "description": "A basic maven, build, test, deploy template",
     "iconName": "maven",
     "categories": [
-        "Java", 
-        "Maven"
+        "Java"
     ],
     "filePatterns": [
         "pom.xml"
