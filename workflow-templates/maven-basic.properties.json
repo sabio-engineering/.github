@@ -1,6 +1,6 @@
 {
-    "name": "Java 11 Basic Maven Build & Deploy",
-    "description": "A basic maven, build, test, deploy template",
+    "name": "Maven Template",
+    "description": "Configurable base corporate Java/Maven template for build/test/archive/docker etc",
     "iconName": "maven",
     "categories": [
         "Java"
