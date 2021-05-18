@@ -119,17 +119,15 @@ jobs:
         
       - name: Log into registry
         if: env.DOCKER_BUILD == 'true'
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
         
       - name: Push image
         if: env.DOCKER_BUILD == 'true'
         run: |
-          PROJECT_NAME=$(echo ${{ github.repository }} | sed 's/sabio-engineering\///')
-          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$PROJECT_NAME
+          IMAGE_ID=ghcr.io/${{ github.repository }}
           
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           echo IMAGE_ID=$IMAGE_ID
           docker image ls | grep $DOCKER_IMAGE_NAME | awk '{print $2}' | xargs -I{} docker tag $DOCKER_IMAGE_NAME $IMAGE_ID:{} 
-
           docker image push --all-tags $IMAGE_ID
