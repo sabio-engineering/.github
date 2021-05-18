@@ -5,7 +5,7 @@ name: Maven Build
 env:
   JAVA_VERSION: '11'
   JAVA_DISTRIBUTION: 'adopt'
-  DOCKER_BUILD: true
+  DOCKER_BUILD: 'true'
   DOCKER_IMAGE_NAME: com.sabiogroup.ivrpulse/ivrpulse
 
 
@@ -56,7 +56,7 @@ jobs:
       
   archive-maven:
     needs: build-test
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -81,7 +81,7 @@ jobs:
 
   archive-docker:
     needs: build-test
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -90,7 +90,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK
-        if: env.DOCKER_BUILD
+        if: env.DOCKER_BUILD == 'true'
         uses: actions/setup-java@v2
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -98,7 +98,7 @@ jobs:
 
       - name: Setup Maven Config
         uses: whelk-io/maven-settings-xml-action@v14
-        if: env.DOCKER_BUILD
+        if: env.DOCKER_BUILD == 'true'
         with:
           repositories: '[{ "id": "github-packages", "url": "https://maven.pkg.github.com/sabio-engineering/*" }]'
           servers: '[{ "id": "github-packages", "username": "read-only-access", "password": "${{ secrets.PACKAGE_ACCESS_TOKEN }}" }, { "id": "github", "username": "${{ github.actor }}", "password": "${{ secrets.GITHUB_TOKEN }}"}]'
@@ -110,18 +110,19 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
           
       - name: Package for deploy
+        if: env.DOCKER_BUILD == 'true'
         run: mvn -B package -DskipTests
 
       - name: Build Docker with Maven
-        if: env.DOCKER_BUILD
+        if: env.DOCKER_BUILD == 'true'
         run: mvn docker:build -P docker
         
       - name: Log into registry
-        if: env.DOCKER_BUILD
+        if: env.DOCKER_BUILD == 'true'
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
         
       - name: Push image
-        if: env.DOCKER_BUILD
+        if: env.DOCKER_BUILD == 'true'
         run: |
           PROJECT_NAME=$(echo ${{ github.repository }} | sed 's/sabio-engineering\///')
           IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$PROJECT_NAME
