@@ -112,14 +112,15 @@ jobs:
       - name: Package for deploy
         if: env.DOCKER_BUILD == 'true'
         run: mvn -B package -DskipTests
+        
+      - name: Log into registry
+        if: env.DOCKER_BUILD == 'true'
+        run: echo "${{ secrets.PACKAGE_ACCESS_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build Docker with Maven
         if: env.DOCKER_BUILD == 'true'
         run: mvn docker:build -P docker
-        
-      - name: Log into registry
-        if: env.DOCKER_BUILD == 'true'
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+       
         
       - name: Push image
         if: env.DOCKER_BUILD == 'true'
